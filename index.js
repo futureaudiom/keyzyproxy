@@ -9,14 +9,15 @@ app.use(express.json());
 const APP_ID = process.env.APP_ID;
 const APP_KEY = process.env.APP_KEY;
 
-const LICENSE_BASE = "https://api.keyzy.io/v2/licenses";
-const ACTIVATION_BASE = "https://api.keyzy.io/v2/activations";
+const KEYZY_LICENSE_URL = "https://api.keyzy.io/v2/licenses/show-license";
+const KEYZY_ACTIVATIONS_URL = "https://api.keyzy.io/v2/activations";
+const KEYZY_DEACTIVATE_URL = "https://api.keyzy.io/v2/licenses/deactivate";
 
-// Show license info
+// Get license info
 app.get("/api/keyzy/license", async (req, res) => {
   try {
     const serial = req.query.serial;
-    const response = await axios.get(`${LICENSE_BASE}/show-license/${serial}`, {
+    const response = await axios.get(`${KEYZY_LICENSE_URL}/${serial}`, {
       headers: {
         "app-id": APP_ID,
         "app-key": APP_KEY,
@@ -24,15 +25,16 @@ app.get("/api/keyzy/license", async (req, res) => {
     });
     res.json(response.data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("License lookup error:", err.message);
+    res.status(err.response?.status || 500).json({ error: err.message });
   }
 });
 
-// Get activations for license
+// Get activations
 app.get("/api/keyzy/activations", async (req, res) => {
   try {
     const serial = req.query.serial;
-    const response = await axios.get(`${ACTIVATION_BASE}/${serial}`, {
+    const response = await axios.get(`${KEYZY_ACTIVATIONS_URL}/${serial}`, {
       headers: {
         "app-id": APP_ID,
         "app-key": APP_KEY,
@@ -40,7 +42,8 @@ app.get("/api/keyzy/activations", async (req, res) => {
     });
     res.json(response.data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Activations error:", err.message);
+    res.status(err.response?.status || 500).json({ error: err.message });
   }
 });
 
@@ -50,7 +53,7 @@ app.post("/api/keyzy/delete", async (req, res) => {
     const { serial, host_id } = req.body;
 
     await axios.post(
-      `${LICENSE_BASE}/deactivate`,
+      KEYZY_DEACTIVATE_URL,
       { serial, host_id },
       {
         headers: {
@@ -59,10 +62,10 @@ app.post("/api/keyzy/delete", async (req, res) => {
         },
       }
     );
-
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Deactivation error:", err.message);
+    res.status(err.response?.status || 500).json({ error: err.message });
   }
 });
 
@@ -74,7 +77,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Proxy running on port ${PORT}`);
 });
-
-
-
-
