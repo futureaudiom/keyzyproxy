@@ -3,87 +3,70 @@ const cors = require("cors");
 const axios = require("axios");
 
 const app = express();
+const port = process.env.PORT || 10000;
+
 app.use(cors());
 app.use(express.json());
 
 const APP_ID = process.env.APP_ID;
 const APP_KEY = process.env.APP_KEY;
 
-const KEYZY_BASE = "https://api.keyzy.io/v2";
-
-// 1. Show license
-app.get("/api/keyzy/license", async (req, res) => {
-  try {
-    const serial = req.query.serial;
-    const response = await axios.get(`${KEYZY_BASE}/licenses/show-license/${serial}`, {
-      params: {
-        app_id: APP_ID,
-        api_key: APP_KEY,
-      },
-    });
-    res.json(response.data);
-  } catch (err) {
-    console.error("License error:", err.response?.data || err.message);
-    res.status(err.response?.status || 500).json({ error: err.message });
-  }
-});
-
-// 2. Get activations
-app.get("/api/keyzy/activations", async (req, res) => {
-  try {
-    const serial = req.query.serial;
-    const response = await axios.get(`${KEYZY_BASE}/activations/${serial}`, {
-      params: {
-        app_id: APP_ID,
-        api_key: APP_KEY,
-      },
-    });
-    res.json(response.data);
-  } catch (err) {
-    console.error("Activations error:", err.response?.data || err.message);
-    res.status(err.response?.status || 500).json({ error: err.message });
-  }
-});
-
-// 3. Deactivate a machine
-app.delete("/api/keyzy/delete", async (req, res) => {
-  try {
-    const { serial, host_id } = req.body;
-
-    const response = await axios.delete(
-      `${KEYZY_BASE}/licenses/deactivate`,
-      {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        params: {
-          app_id: APP_ID,
-          api_key: APP_KEY,
-        },
-        data: {
-          serial,
-          host_id,
-        },
-      }
-    );
-
-    res.json({ success: true, data: response.data });
-  } catch (err) {
-    console.error("Deactivation error:", err.response?.data || err.message);
-    res.status(err.response?.status || 500).json({
-      error: err.message,
-      details: err.response?.data || null,
-    });
-  }
-});
-
-
-// Root route to confirm proxy is live
 app.get("/", (req, res) => {
-  res.send("Keyzy proxy is live");
+  res.send("Keyzy proxy is running");
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Proxy running on port ${PORT}`);
+// Show license info
+app.get("/api/keyzy/license", async (req, res) => {
+  const { serial } = req.query;
+  try {
+    const response = await axios.get(`https://api.keyzy.io/v2/licenses/show-license/${serial}`, {
+      params: {
+        app_id: APP_ID,
+        api_key: APP_KEY
+      }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error("License fetch error:", error?.response?.data || error.message);
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
 });
+
+// Get activations
+app.get("/api/keyzy/activations", async (req, res) => {
+  const { serial } = req.query;
+  try {
+    const response = await axios.get(`https://api.keyzy.io/v2/activations/${serial}`, {
+      params: {
+        app_id: APP_ID,
+        api_key: APP_KEY
+      }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error("Activations error:", error?.response?.data || error.message);
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
+});
+
+// Delete activation (via activation ID, not host_id)
+app.delete("/api/keyzy/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const response = await axios.delete(`https://api.keyzy.io/v2/activations/${id}`, {
+      params: {
+        app_id: APP_ID,
+        api_key: APP_KEY
+      }
+    });
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    console.error("Deactivation error:", error?.response?.data || error.message);
+    res.status(error.response?.status || 500).json({ error: error.message });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Proxy running on port ${port}`);
+});
+
