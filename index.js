@@ -9,6 +9,9 @@ app.use(express.json());
 const APP_ID = process.env.APP_ID;
 const APP_KEY = process.env.APP_KEY;
 
+console.log("Using APP_ID:", APP_ID);
+console.log("Using APP_KEY:", APP_KEY);
+
 const KEYZY_LICENSE_URL = "https://api.keyzy.io/v2/licenses/show-license";
 const KEYZY_ACTIVATIONS_URL = "https://api.keyzy.io/v2/activations";
 const KEYZY_DEACTIVATE_URL = "https://api.keyzy.io/v2/licenses/deactivate";
