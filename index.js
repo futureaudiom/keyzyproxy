@@ -49,23 +49,26 @@ app.get("/api/keyzy/activations", async (req, res) => {
 app.post("/api/keyzy/delete", async (req, res) => {
   try {
     const { serial, host_id } = req.body;
+
     const response = await axios.post(
       `${KEYZY_BASE}/licenses/deactivate`,
       { serial, host_id },
       {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         params: {
           app_id: APP_ID,
           api_key: APP_KEY,
         },
       }
     );
-    res.json(response.data);
+
+    res.json({ success: true, data: response.data });
   } catch (err) {
     console.error("Deactivation error:", err.response?.data || err.message);
-    res.status(err.response?.status || 500).json({ error: err.message });
+    res.status(err.response?.status || 500).json({
+      error: err.message,
+      details: err.response?.data || null,
+    });
   }
 });
 
