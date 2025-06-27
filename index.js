@@ -46,18 +46,23 @@ app.get("/api/keyzy/activations", async (req, res) => {
 });
 
 // 3. Deactivate a machine
-app.post("/api/keyzy/delete", async (req, res) => {
+app.delete("/api/keyzy/delete", async (req, res) => {
   try {
     const { serial, host_id } = req.body;
 
-    const response = await axios.post(
+    const response = await axios.delete(
       `${KEYZY_BASE}/licenses/deactivate`,
-      { serial, host_id },
       {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         params: {
           app_id: APP_ID,
           api_key: APP_KEY,
+        },
+        data: {
+          serial,
+          host_id,
         },
       }
     );
@@ -71,6 +76,7 @@ app.post("/api/keyzy/delete", async (req, res) => {
     });
   }
 });
+
 
 // Root route to confirm proxy is live
 app.get("/", (req, res) => {
