@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const writeMetafield = require("./api/write-metafield.js");
 
 const app = express();
 const port = process.env.PORT || 10000;
@@ -11,6 +12,7 @@ app.use(express.json());
 const APP_ID = process.env.APP_ID;
 const APP_KEY = process.env.APP_KEY;
 
+// Root check
 app.get("/", (req, res) => {
   res.send("Keyzy proxy is running");
 });
@@ -49,7 +51,7 @@ app.get("/api/keyzy/activations", async (req, res) => {
   }
 });
 
-// Delete activation (via activation ID, not host_id)
+// Delete activation (via activation ID)
 app.delete("/api/keyzy/delete/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -66,25 +68,9 @@ app.delete("/api/keyzy/delete/:id", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Proxy running on port ${port}`);
-});
-
-import express from "express";
-import bodyParser from "body-parser";
-import writeMetafield from "./api/write-metafield.js";
-
-const app = express();
-app.use(bodyParser.json());
-
-// Add your API route here
+// ✅ NEW: write serial to customer metafield
 app.post("/api/write-metafield", writeMetafield);
 
-app.get("/", (req, res) => {
-  res.send("API is running.");
-});
-
-const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Proxy running on port ${port}`);
 });
