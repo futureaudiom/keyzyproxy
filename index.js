@@ -70,3 +70,21 @@ app.listen(port, () => {
   console.log(`Proxy running on port ${port}`);
 });
 
+import express from "express";
+import bodyParser from "body-parser";
+import writeMetafield from "./api/write-metafield.js";
+
+const app = express();
+app.use(bodyParser.json());
+
+// Add your API route here
+app.post("/api/write-metafield", writeMetafield);
+
+app.get("/", (req, res) => {
+  res.send("API is running.");
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
