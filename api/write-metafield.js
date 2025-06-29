@@ -12,7 +12,9 @@ module.exports = async function (req, res) {
   }
 
   try {
-    const response = await fetch(`https://${process.env.SHOP_NAME}.myshopify.com/admin/api/2024-04/customers/${customerId}/metafields.json`, {
+    const url = `https://${process.env.SHOP_NAME}.myshopify.com/admin/api/2024-04/customers/${customerId}/metafields.json`;
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -25,18 +27,19 @@ module.exports = async function (req, res) {
           value: serial,
           type: "single_line_text_field"
         }
-      })
+      }),
     });
 
-    const result = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.errors || "Failed to write metafield");
+      console.error("Shopify API error:", data);
+      return res.status(response.status).json({ error: data });
     }
 
-    res.status(200).json({ success: true, data: result });
+    res.status(200).json({ success: true, data });
   } catch (err) {
-    console.error("Metafield write error:", err.message);
-    res.status(500).json({ error: err.message });
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Unexpected server error" });
   }
 };
