@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const writeMetafield = require("./api/write-metafield.js");
+const writeMetafield = require("./api/write-metafield");
 
 const app = express();
 const port = process.env.PORT || 10000;
@@ -12,12 +12,12 @@ app.use(express.json());
 const APP_ID = process.env.APP_ID;
 const APP_KEY = process.env.APP_KEY;
 
-// Root check
+// Test route
 app.get("/", (req, res) => {
   res.send("Keyzy proxy is running");
 });
 
-// Show license info
+// Keyzy: Show license info
 app.get("/api/keyzy/license", async (req, res) => {
   const { serial } = req.query;
   try {
@@ -34,7 +34,7 @@ app.get("/api/keyzy/license", async (req, res) => {
   }
 });
 
-// Get activations
+// Keyzy: Get activations
 app.get("/api/keyzy/activations", async (req, res) => {
   const { serial } = req.query;
   try {
@@ -51,7 +51,7 @@ app.get("/api/keyzy/activations", async (req, res) => {
   }
 });
 
-// Delete activation (via activation ID)
+// Keyzy: Delete activation
 app.delete("/api/keyzy/delete/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -68,7 +68,7 @@ app.delete("/api/keyzy/delete/:id", async (req, res) => {
   }
 });
 
-// ✅ NEW: write serial to customer metafield
+// ✅ Shopify: Write metafield route
 app.post("/api/write-metafield", writeMetafield);
 
 app.listen(port, () => {
