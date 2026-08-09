@@ -1,167 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>DST License Admin</title>
-  <meta name="robots" content="noindex, nofollow" />
-  <style>
-      * { box-sizing: border-box; }
-      body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #131718;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      }
-      .card {
-            width: 100%;
-            max-width: 480px;
-            margin: 40px 20px;
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-      }
-      h1 {
-            font-size: 1.4rem;
-            margin: 0 0 6px;
-      }
-      p.subtitle {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-            margin: 0 0 24px;
-            line-height: 1.5;
-      }
-      label {
-            display: block;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin: 16px 0 6px;
-      }
-      input {
-            width: 100%;
-            padding: 10px 14px;
-            font-size: 0.95rem;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: #fff;
-      }
-      input::placeholder { color: rgba(255, 255, 255, 0.35); }
-      button {
-            width: 100%;
-            margin-top: 24px;
-            padding: 12px 20px;
-            background-color: #fff;
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-      }
-      button:hover { background-color: #ccc; }
-      button:disabled { opacity: 0.6; cursor: default; }
-      .result {
-            margin-top: 20px;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            display: none;
-            white-space: pre-wrap;
-      }
-      .result.error {
-            display: block;
-            background: rgba(255, 100, 100, 0.1);
-            border: 1px solid rgba(255, 100, 100, 0.3);
-            color: #ff8080;
-      }
-      .result.success {
-            display: block;
-            background: rgba(120, 220, 150, 0.1);
-            border: 1px solid rgba(120, 220, 150, 0.3);
-            color: #7fdc9c;
-      }
-    </style>
-  </head>
-  <body>
-      <div class="card">
-            <h1>Reset a DST License (error 4)</h1>
-          <p class="subtitle">Deletes the customer's broken license and issues a fresh one on the same SKU. Not undoable — double-check the email and serial before hitting reset.</p>p>
-      
-          <label for="password">Admin password</label>label>
-          <input type="password" id="password" placeholder="Password" autocomplete="off" />
-      
-          <label for="email">Customer email</label>label>
-          <input type="email" id="email" placeholder="customer@example.com" autocomplete="off" />
-      
-          <label for="serial">Broken serial (as reported by customer)</label>label>
-          <input type="text" id="serial" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" />
-      
-          <button id="submit-btn">Reset License</button>button>
-      
-          <div id="result" class="result"></div>div>
-      </div>div>
-  
-    <script>
-          const btn = document.getElementById("submit-btn");
-          const resultEl = document.getElementById("result");
+<head>
+<meta charset="UTF-8" />
+<title>DST License Admin</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #131718;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .card {
+    width: 100%;
+    max-width: 480px;
+    margin: 40px 20px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+  h1 {
+    font-size: 1.4rem;
+    margin: 0 0 6px;
+  }
+  p.subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+  label {
+    display: block;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 16px 0 6px;
+  }
+  input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #fff;
+  }
+  input::placeholder { color: rgba(255, 255, 255, 0.35); }
+  button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 12px 20px;
+    background-color: #fff;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button:hover { background-color: #ccc; }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .result {
+    margin-top: 20px;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    display: none;
+    white-space: pre-wrap;
+  }
+  .result.error {
+    display: block;
+    background: rgba(255, 100, 100, 0.1);
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    color: #ff8080;
+  }
+  .result.success {
+    display: block;
+    background: rgba(120, 220, 150, 0.1);
+    border: 1px solid rgba(120, 220, 150, 0.3);
+    color: #7fdc9c;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Reset a DST License (error 4)</h1>
+    <p class="subtitle">Deletes the customer's broken license and issues a fresh one on the same SKU. Not undoable — double-check the email and serial before hitting reset.</p>
 
-          btn.addEventListener("click", async () => {
-                  const password = document.getElementById("password").value;
-                  const customerEmail = document.getElementById("email").value.trim();
-                  const oldSerial = document.getElementById("serial").value.trim();
+    <label for="password">Admin password</label>
+    <input type="password" id="password" placeholder="Password" autocomplete="off" />
 
-                  resultEl.className = "result";
-                  resultEl.textContent = "";
+    <label for="email">Customer email</label>
+    <input type="email" id="email" placeholder="customer@example.com" autocomplete="off" />
 
-                  if (!password || !customerEmail || !oldSerial) {
-                            resultEl.className = "result error";
-                            resultEl.textContent = "Fill in all three fields first.";
-                            return;
-                  }
+    <label for="serial">Broken serial (as reported by customer)</label>
+    <input type="text" id="serial" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" />
 
-                  const confirmed = confirm(
-                            `This will permanently delete serial ${oldSerial} for ${customerEmail} and replace it with a new one. This cannot be undone. Continue?`
-                          );
-                  if (!confirmed) return;
+    <button id="submit-btn">Reset License</button>
 
-                  btn.disabled = true;
-                  btn.textContent = "Working...";
+    <div id="result" class="result"></div>
+  </div>
 
-                  try {
-                            const res = await fetch("/api/admin/reset-license", {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify({ password, customerEmail, oldSerial }),
-                            });
-                            const data = await res.json();
+  <script>
+    const btn = document.getElementById("submit-btn");
+    const resultEl = document.getElementById("result");
 
-                            if (!res.ok) {
-                                        resultEl.className = "result error";
-                                        resultEl.textContent = data.error || "Something went wrong.";
-                            } else {
-                                        resultEl.className = "result success";
-                                        resultEl.textContent = `Done. ${customerEmail} now has serial ${data.newSerial}. Their Shopify account has been updated automatically.`;
-                            }
-                  } catch (err) {
-                            resultEl.className = "result error";
-                            resultEl.textContent = "Network error -- please try again.";
-                  } finally {
-                            btn.disabled = false;
-                            btn.textContent = "Reset License";
-                  }
-          });
-    </script>
-  </body>
+    btn.addEventListener("click", async () => {
+      const password = document.getElementById("password").value;
+      const customerEmail = document.getElementById("email").value.trim();
+      const oldSerial = document.getElementById("serial").value.trim();
+
+      resultEl.className = "result";
+      resultEl.textContent = "";
+
+      if (!password || !customerEmail || !oldSerial) {
+        resultEl.className = "result error";
+        resultEl.textContent = "Fill in all three fields first.";
+        return;
+      }
+
+      const confirmed = confirm(
+        `This will permanently delete serial ${oldSerial} for ${customerEmail} and replace it with a new one. This cannot be undone. Continue?`
+      );
+      if (!confirmed) return;
+
+      btn.disabled = true;
+      btn.textContent = "Working...";
+
+      try {
+        const res = await fetch("/api/admin/reset-license", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password, customerEmail, oldSerial }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          resultEl.className = "result error";
+          resultEl.textContent = data.error || "Something went wrong.";
+        } else {
+          resultEl.className = "result success";
+          resultEl.textContent = `Done. ${customerEmail} now has serial ${data.newSerial}. Their Shopify account has been updated automatically.`;
+        }
+      } catch (err) {
+        resultEl.className = "result error";
+        resultEl.textContent = "Network error -- please try again.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Reset License";
+      }
+    });
+  </script>
+</body>
 </html>
-
-    </script></h1>
-  </body>
-  </style></title>
-  </head>est
