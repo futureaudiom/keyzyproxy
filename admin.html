@@ -42,6 +42,11 @@
     color: rgba(255, 255, 255, 0.7);
     margin: 16px 0 6px;
   }
+  label.optional::after {
+    content: " (optional -- syncs their dashboard too)";
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: normal;
+  }
   input {
     width: 100%;
     padding: 10px 14px;
@@ -87,49 +92,112 @@
     border: 1px solid rgba(120, 220, 150, 0.3);
     color: #7fdc9c;
   }
+  .hidden { display: none; }
+  .back-link {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .back-link:hover { color: #fff; }
 </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="gate-card">
+    <h1>DST License Admin</h1>
+    <p class="subtitle">Enter the admin password to continue.</p>
+    <label for="gate-password">Password</label>
+    <input type="password" id="gate-password" placeholder="Password" autocomplete="off" />
+    <button id="unlock-btn">Unlock</button>
+    <div id="gate-result" class="result"></div>
+  </div>
+
+  <div class="card hidden" id="tool-card">
     <h1>Reset a DST License (error 4)</h1>
-    <p class="subtitle">Deletes the customer's broken license and issues a fresh one on the same SKU. Not undoable — double-check the email and serial before hitting reset.</p>
+    <p class="subtitle">Deletes the customer's broken license and issues a fresh one on the same SKU. Not undoable -- double-check the serial before hitting reset.</p>
 
-    <label for="password">Admin password</label>
-    <input type="password" id="password" placeholder="Password" autocomplete="off" />
-
-    <label for="email">Customer email</label>
-    <input type="email" id="email" placeholder="customer@example.com" autocomplete="off" />
-
-    <label for="serial">Broken serial (as reported by customer)</label>
+    <label for="serial">Broken serial (from the customer's email)</label>
     <input type="text" id="serial" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" />
+
+    <label for="email" class="optional">Customer email</label>
+    <input type="email" id="email" placeholder="customer@example.com" autocomplete="off" />
 
     <button id="submit-btn">Reset License</button>
 
     <div id="result" class="result"></div>
+    <a class="back-link" id="lock-link">Lock</a>
   </div>
 
   <script>
+    const gateCard = document.getElementById("gate-card");
+    const toolCard = document.getElementById("tool-card");
+    const gatePasswordInput = document.getElementById("gate-password");
+    const gateResultEl = document.getElementById("gate-result");
+    const unlockBtn = document.getElementById("unlock-btn");
+    const lockLink = document.getElementById("lock-link");
+
+    let adminPassword = "";
+
+    function showTool(pw) {
+      adminPassword = pw;
+      gateCard.classList.add("hidden");
+      toolCard.classList.remove("hidden");
+    }
+
+    function lock() {
+      adminPassword = "";
+      sessionStorage.removeItem("dstAdminPassword");
+      gatePasswordInput.value = "";
+      toolCard.classList.add("hidden");
+      gateCard.classList.remove("hidden");
+    }
+
+    lockLink.addEventListener("click", lock);
+
+    // Remember the password for the rest of this browser tab session so a
+    // page refresh doesn't force retyping it.
+    const savedPassword = sessionStorage.getItem("dstAdminPassword");
+    if (savedPassword) {
+      showTool(savedPassword);
+    }
+
+    unlockBtn.addEventListener("click", () => {
+      const pw = gatePasswordInput.value.trim();
+      if (!pw) {
+        gateResultEl.className = "result error";
+        gateResultEl.textContent = "Enter the password first.";
+        return;
+      }
+      sessionStorage.setItem("dstAdminPassword", pw);
+      showTool(pw);
+    });
+
+    gatePasswordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") unlockBtn.click();
+    });
+
     const btn = document.getElementById("submit-btn");
     const resultEl = document.getElementById("result");
 
     btn.addEventListener("click", async () => {
-      const password = document.getElementById("password").value;
-      const customerEmail = document.getElementById("email").value.trim();
       const oldSerial = document.getElementById("serial").value.trim();
+      const customerEmail = document.getElementById("email").value.trim();
 
       resultEl.className = "result";
       resultEl.textContent = "";
 
-      if (!password || !customerEmail || !oldSerial) {
+      if (!oldSerial) {
         resultEl.className = "result error";
-        resultEl.textContent = "Fill in all three fields first.";
+        resultEl.textContent = "Paste the broken serial first.";
         return;
       }
 
-      const confirmed = confirm(
-        `This will permanently delete serial ${oldSerial} for ${customerEmail} and replace it with a new one. This cannot be undone. Continue?`
-      );
-      if (!confirmed) return;
+      const confirmMsg = customerEmail
+        ? `This will permanently delete serial ${oldSerial} and replace it with a new one, and update ${customerEmail}'s Shopify account. This cannot be undone. Continue?`
+        : `This will permanently delete serial ${oldSerial} and replace it with a new one. No email was given, so no Shopify account will be updated -- you'll need to relay the new serial yourself. This cannot be undone. Continue?`;
+      if (!confirm(confirmMsg)) return;
 
       btn.disabled = true;
       btn.textContent = "Working...";
@@ -138,16 +206,23 @@
         const res = await fetch("/api/admin/reset-license", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password, customerEmail, oldSerial }),
+          body: JSON.stringify({
+            password: adminPassword,
+            oldSerial,
+            customerEmail: customerEmail || undefined,
+          }),
         });
         const data = await res.json();
 
         if (!res.ok) {
           resultEl.className = "result error";
           resultEl.textContent = data.error || "Something went wrong.";
+          if (res.status === 401) lock();
         } else {
           resultEl.className = "result success";
-          resultEl.textContent = `Done. ${customerEmail} now has serial ${data.newSerial}. Their Shopify account has been updated automatically.`;
+          resultEl.textContent = data.shopifyUpdated
+            ? `Done. New serial: ${data.newSerial}. ${data.customerEmail}'s Shopify account has been updated automatically.`
+            : `Done. New serial: ${data.newSerial}. No email was given, so send this serial to the customer yourself.`;
         }
       } catch (err) {
         resultEl.className = "result error";
