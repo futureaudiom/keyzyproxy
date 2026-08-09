@@ -19,8 +19,11 @@ module.exports = async function (req, res) {
   }
 
   const { password, customerEmail, oldSerial } = req.body || {};
+  // Trim whitespace on the password -- copy/pasting from chat or notes
+  // apps can carry a trailing space or newline along with it.
+  const trimmedPassword = (password || "").trim();
 
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
+  if (!trimmedPassword || trimmedPassword !== process.env.ADMIN_PASSWORD) {
     return res.status(401).json({ error: "Wrong password." });
   }
   if (!customerEmail || !oldSerial) {
